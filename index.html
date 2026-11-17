@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planejador da Loja — Compras & Ideias</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase SDK (Compat para funcionar direto no navegador e GitHub Pages) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <span class="logo">🛍️</span>
+        <div>
+          <h1>Planejador da Loja</h1>
+          <p class="subtitle">Lista inicial de compras, equipamentos e ideias</p>
+        </div>
+      </div>
+
+      <div class="sync-controls">
+        <span id="statusBadge" class="badge badge-local">💾 Modo Local</span>
+        <button id="btnCloudModal" class="btn btn-outline">☁️ Banco na Nuvem</button>
+        <button id="btnShareLink" class="btn btn-primary" title="Copiar link com configuração do banco para seu amigo">🔗 Link p/ Amigo</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-grid">
+    <!-- Resumo Financeiro / Progresso -->
+    <section class="stats-bar">
+      <div class="stat-card">
+        <span class="stat-label">Total de Itens</span>
+        <strong id="statTotal" class="stat-value">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Já Comprados</span>
+        <strong id="statBought" class="stat-value text-success">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Orçamento Estimado</span>
+        <strong id="statBudget" class="stat-value">R$ 0,00</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Falta Gastar</span>
+        <strong id="statRemaining" class="stat-value text-warning">R$ 0,00</strong>
+      </div>
+    </section>
+
+    <!-- Formulário para Adicionar Item ou Ideia -->
+    <section class="card form-section">
+      <h2>➕ Adicionar Compra ou Ideia</h2>
+      <form id="itemForm" class="item-form">
+        <div class="form-group">
+          <label for="itemType">Tipo</label>
+          <select id="itemType" required>
+            <option value="compra">🛒 Item para Comprar</option>
+            <option value="ideia">💡 Ideia / Observação</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="itemCategory">Categoria</label>
+          <select id="itemCategory" required>
+            <option value="Estoque / Produtos">📦 Estoque / Produtos</option>
+            <option value="Móveis & Estrutura">🪑 Móveis & Estrutura</option>
+            <option value="Equipamentos & Sistema">💻 Equipamentos & Sistema</option>
+            <option value="Marketing & Fachada">🎨 Marketing & Fachada</option>
+            <option value="Burocracia & Taxas">📄 Burocracia & Taxas</option>
+            <option value="Outros">✨ Outros</option>
+          </select>
+        </div>
+
+        <div class="form-group flex-2">
+          <label for="itemTitle">O que precisa comprar ou qual a ideia?</label>
+          <input type="text" id="itemTitle" placeholder="Ex: Balcão caixa, Araras, Impressora térmica..." required />
+        </div>
+
+        <div class="form-group">
+          <label for="itemQty">Qtd.</label>
+          <input type="number" id="itemQty" min="1" value="1" />
+        </div>
+
+        <div class="form-group">
+          <label for="itemPrice">Valor Unit. (R$)</label>
+          <input type="number" id="itemPrice" min="0" step="0.01" placeholder="0,00" />
+        </div>
+
+        <div class="form-group">
+          <label for="itemPriority">Prioridade</label>
+          <select id="itemPriority">
+            <option value="alta">🔴 Alta (Urgente)</option>
+            <option value="media" selected>🟡 Média</option>
+            <option value="baixa">🟢 Baixa (Depois)</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="itemNotes">Detalhes / Link de fornecedor (opcional)</label>
+          <input type="text" id="itemNotes" placeholder="Ex: Cotar na loja X ou link do Mercado Livre / Shopee" />
+        </div>
+
+        <div class="form-actions full-width">
+          <button type="submit" class="btn btn-primary">Salvar na Lista</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Filtros e Listas -->
+    <section class="card list-section">
+      <div class="list-header">
+        <div class="tabs">
+          <button class="tab active" data-filter="todos">Tudo (<span id="countAll">0</span>)</button>
+          <button class="tab" data-filter="compra">🛒 Compras (<span id="countCompras">0</span>)</button>
+          <button class="tab" data-filter="ideia">💡 Ideias (<span id="countIdeias">0</span>)</button>
+        </div>
+
+        <div class="filters-right">
+          <input type="text" id="searchInput" placeholder="🔍 Buscar item..." />
+          <select id="categoryFilter">
+            <option value="todas">Todas as categorias</option>
+            <option value="Estoque / Produtos">Estoque / Produtos</option>
+            <option value="Móveis & Estrutura">Móveis & Estrutura</option>
+            <option value="Equipamentos & Sistema">Equipamentos & Sistema</option>
+            <option value="Marketing & Fachada">Marketing & Fachada</option>
+            <option value="Burocracia & Taxas">Burocracia & Taxas</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="itemsList" class="items-list">
+        <!-- Itens renderizados via JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal de Configuração do Banco de Dados na Nuvem (Firebase) -->
+  <div id="cloudModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>☁️ Conectar Banco de Dados Online (Firebase)</h3>
+        <button id="closeModal" class="btn-icon">✖</button>
+      </div>
+      <div class="modal-body">
+        <p class="help-text">
+          Para você e seu amigo acessarem e editarem juntos de casas diferentes (hospedado no GitHub Pages):
+        </p>
+        <ol class="steps-list">
+          <li>Acesse <a href="https://console.firebase.google.com/" target="_blank">console.firebase.google.com</a> (gratuito) e crie um projeto.</li>
+          <li>No menu lateral, vá em <strong>Criação &gt; Firestore Database</strong> e clique em <strong>Criar banco de dados</strong> (inicie no <em>Modo de teste</em>).</li>
+          <li>Vá em <strong>Configurações do Projeto (⚙️) &gt; Seus aplicativos &gt; Web (&lt;/&gt;)</strong> e copie o objeto <code>firebaseConfig</code>.</li>
+          <li>Cole o JSON ou o bloco <code>firebaseConfig</code> abaixo e clique em Conectar:</li>
+        </ol>
+
+        <textarea id="firebaseConfigInput" rows="7" placeholder='{
+  "apiKey": "SUA_API_KEY",
+  "authDomain": "seu-projeto.firebaseapp.com",
+  "projectId": "seu-projeto",
+  "storageBucket": "seu-projeto.appspot.com",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abcdef"
+}'></textarea>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label for="roomCodeInput">Código da Sala (para separar sua loja):</label>
+          <input type="text" id="roomCodeInput" value="minha-loja-2026" />
+        </div>
+
+        <div class="modal-footer">
+          <button id="btnDisconnectCloud" class="btn btn-danger-outline">Voltar para Modo Local</button>
+          <button id="btnSaveCloud" class="btn btn-primary">Conectar Banco Online</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

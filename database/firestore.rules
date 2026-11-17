@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permite leitura e escrita na coleção da loja para você e seu amigo
+    match /lojas/{lojaId}/itens/{itemId} {
+      allow read, write: if true;
+    }
+  }
+}

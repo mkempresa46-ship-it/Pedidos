@@ -1,0 +1,42 @@
+{
+  "loja": "minha-loja-2026",
+  "descricao": "Estrutura de dados inicial para importação ou referência do Firestore / LocalStorage",
+  "itens": [
+    {
+      "id": "item-001",
+      "type": "compra",
+      "category": "Equipamentos & Sistema",
+      "title": "Leitor de Código de Barras + Impressora Térmica",
+      "qty": 1,
+      "price": 450.0,
+      "priority": "alta",
+      "notes": "Essencial para agilizar o caixa na inauguração",
+      "bought": false,
+      "createdAt": 1794879000000
+    },
+    {
+      "id": "item-002",
+      "type": "compra",
+      "category": "Móveis & Estrutura",
+      "title": "Balcão de Atendimento / Caixa",
+      "qty": 1,
+      "price": 800.0,
+      "priority": "alta",
+      "notes": "Ver medidas antes de fechar pedido",
+      "bought": false,
+      "createdAt": 1794879001000
+    },
+    {
+      "id": "item-003",
+      "type": "ideia",
+      "category": "Marketing & Fachada",
+      "title": "Criar perfil no Instagram e fazer promoção de inauguração",
+      "qty": 1,
+      "price": 0,
+      "priority": "media",
+      "notes": "Sortear um kit da loja para quem marcar 2 amigos",
+      "bought": false,
+      "createdAt": 1794879002000
+    }
+  ]
+}
